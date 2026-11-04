@@ -3,76 +3,208 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CSE - Journal Admin</title>
+  <title>CSE - Journal des validations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #f0f2f5; color: #333; padding: 30px; }
-    h1 { color: #1a73e8; margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; background: white;
-      border-radius: 8px; overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    thead { background: #1a73e8; color: white; }
-    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #eee; }
-    tbody tr:hover { background: #e8f0fe; }
-    .back { display: inline-block; margin-bottom: 20px; color: #1a73e8;
-      text-decoration: none; font-size: 14px; }
-    .back:hover { text-decoration: underline; }
-    .export-btn {
-      background: #34a853; color: white; border: none;
-      padding: 8px 18px; border-radius: 6px; cursor: pointer;
-      font-size: 14px; margin-bottom: 16px;
+    body { font-family: 'Inter', sans-serif; background: #f5f7fa; color: #1a1a2e; font-size: 14px; }
+
+    .header {
+      background: white; border-bottom: 1px solid #e5e7eb;
+      padding: 0 32px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
     }
-    #access-denied { display: none; color: red; font-size: 18px; margin-top: 40px; text-align: center; }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-logo {
+      width: 32px; height: 32px; background: #1a73e8;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    }
+    .header-logo span { color: white; font-weight: 700; font-size: 14px; }
+    .header-title { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+
+    .btn-back {
+      padding: 7px 16px; background: transparent; border: 1px solid #e5e7eb;
+      border-radius: 7px; font-size: 13px; cursor: pointer; color: #374151;
+      font-family: 'Inter', sans-serif; transition: all 0.2s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-back:hover { background: #f5f7fa; border-color: #d1d5db; }
+
+    .btn-export {
+      padding: 7px 16px; background: #1a73e8; border: none;
+      border-radius: 7px; font-size: 13px; cursor: pointer; color: white;
+      font-family: 'Inter', sans-serif; transition: all 0.2s;
+    }
+    .btn-export:hover { background: #1557b0; }
+
+    .main { padding: 32px; max-width: 1100px; margin: 0 auto; }
+
+    .page-title { font-size: 20px; font-weight: 600; color: #1a1a2e; margin-bottom: 24px; }
+
+    .filters {
+      display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .search-input {
+      padding: 9px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
+      font-size: 13px; font-family: 'Inter', sans-serif; width: 240px;
+      outline: none; transition: border 0.2s; color: #1a1a2e;
+    }
+    .search-input:focus { border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+    .select-filter {
+      padding: 9px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
+      font-size: 13px; font-family: 'Inter', sans-serif;
+      outline: none; background: white; color: #374151; cursor: pointer;
+    }
+
+    .table-wrap {
+      background: white; border-radius: 10px; border: 1px solid #e5e7eb;
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+    thead th {
+      padding: 12px 16px; text-align: left; font-size: 11px;
+      font-weight: 600; color: #6b7280; text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    tbody tr { border-bottom: 1px solid #f3f4f6; transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f9fafb; }
+    td { padding: 12px 16px; color: #374151; }
+
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 500;
+    }
+    .badge-vac { background: #eff6ff; color: #1a73e8; }
+    .badge-sport { background: #f0fdf4; color: #16a34a; }
+
+    .empty-state {
+      text-align: center; padding: 60px 20px; color: #6b7280; font-size: 14px;
+    }
+
+    #access-denied {
+      display: flex; align-items: center; justify-content: center;
+      height: 100vh; font-size: 16px; color: #dc2626; font-weight: 500;
+    }
+
     #content { display: none; }
   </style>
 </head>
 <body>
 
-<div id="access-denied">⛔ Accès réservé à l'administrateur.</div>
+<div id="access-denied">Accès réservé à l'administrateur.</div>
 
 <div id="content">
-  <a class="back" href="index.html">← Retour au tableau</a>
-  <h1>📋 Journal des validations</h1>
-  <button class="export-btn" onclick="exportCSV()">⬇️ Exporter en CSV</button>
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Nom</th>
-        <th>Prénom</th>
-        <th>Validé par</th>
-        <th>Date & heure</th>
-      </tr>
-    </thead>
-    <tbody id="log-body"></tbody>
-  </table>
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo"><span>C</span></div>
+      <span class="header-title">CSE — Journal des validations</span>
+    </div>
+    <div class="header-right">
+      <a href="index.html" class="btn-back">← Retour</a>
+      <button class="btn-export" onclick="exportCSV()">Exporter CSV</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="filters">
+      <input type="text" class="search-input" id="search" placeholder="Rechercher un nom..." oninput="filterLog()" />
+      <select class="select-filter" id="filter-type" onchange="filterLog()">
+        <option value="">Tous types</option>
+        <option value="Vacances">Vacances</option>
+        <option value="Sport">Sport</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Type</th>
+            <th>Montant</th>
+            <th>Validé par</th>
+            <th>Date & heure</th>
+          </tr>
+        </thead>
+        <tbody id="log-body"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <script>
   const session = localStorage.getItem("cse_session");
+
   if (session !== "admin") {
-    document.getElementById("access-denied").style.display = "block";
+    document.getElementById("access-denied").style.display = "flex";
   } else {
+    document.getElementById("access-denied").style.display = "none";
     document.getElementById("content").style.display = "block";
-    const log = JSON.parse(localStorage.getItem("cse_log") || "[]");
+    renderLog();
+  }
+
+  function getLog() {
+    return JSON.parse(localStorage.getItem("cse_log") || "[]");
+  }
+
+  function renderLog(filtered) {
+    const log = filtered !== undefined ? filtered : getLog();
     const tbody = document.getElementById("log-body");
+    tbody.innerHTML = "";
+
     if (log.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888">Aucune validation enregistrée.</td></tr>';
-    } else {
-      log.forEach((entry, i) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${i+1}</td><td>${entry.nom}</td><td>${entry.prenom}</td>
-                        <td>${entry.validePar}</td><td>${entry.date}</td>`;
-        tbody.appendChild(tr);
-      });
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7">
+            <div class="empty-state">Aucune validation enregistrée.</div>
+          </td>
+        </tr>`;
+      return;
     }
+
+    log.forEach((entry, i) => {
+      const tr = document.createElement("tr");
+      const badgeClass = entry.type === "Vacances" ? "badge-vac" : "badge-sport";
+      tr.innerHTML = `
+        <td style="color:#9ca3af">${i + 1}</td>
+        <td style="font-weight:500">${entry.nom}</td>
+        <td>${entry.prenom}</td>
+        <td><span class="badge ${badgeClass}">${entry.type}</span></td>
+        <td>${entry.montant} €</td>
+        <td>${entry.validePar}</td>
+        <td style="color:#6b7280">${entry.date}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function filterLog() {
+    const search = document.getElementById("search").value.toLowerCase();
+    const type   = document.getElementById("filter-type").value;
+    const log    = getLog();
+
+    const filtered = log.filter(e => {
+      const matchSearch = (e.nom + " " + e.prenom).toLowerCase().includes(search);
+      const matchType   = type ? e.type === type : true;
+      return matchSearch && matchType;
+    });
+
+    renderLog(filtered);
   }
 
   function exportCSV() {
-    const log = JSON.parse(localStorage.getItem("cse_log") || "[]");
-    let csv = "Nom,Prénom,Validé par,Date\n";
-    log.forEach(e => { csv += `${e.nom},${e.prenom},${e.validePar},${e.date}\n`; });
-    const blob = new Blob([csv], { type: "text/csv" });
+    const log = getLog();
+    let csv = "Nom,Prénom,Type,Montant,Validé par,Date\n";
+    log.forEach(e => {
+      csv += `${e.nom},${e.prenom},${e.type},${e.montant} €,${e.validePar},${e.date}\n`;
+    });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "journal_validations_CSE.csv";
