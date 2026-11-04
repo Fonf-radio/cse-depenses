@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CSE - Suivi des dépenses</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f2f5; color: #333; }
+
+    #login-screen {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; height: 100vh;
+    }
+    #login-screen h1 { margin-bottom: 20px; color: #1a73e8; }
+    #login-screen input {
+      display: block; width: 280px; padding: 10px;
+      margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;
+    }
+    #login-screen button {
+      width: 280px; padding: 10px; background: #1a73e8;
+      color: white; border: none; border-radius: 6px;
+      font-size: 15px; cursor: pointer; margin-top: 10px;
+    }
+    #login-screen button:hover { background: #1558b0; }
+    #login-error { color: red; font-size: 13px; margin-top: 8px; }
+
+    #app { display: none; padding: 20px; }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #1a73e8; color: white; padding: 14px 20px;
+      border-radius: 8px; margin-bottom: 20px;
+    }
+    header h1 { font-size: 20px; }
+    header div { display: flex; gap: 10px; align-items: center; }
+    #user-label { font-size: 14px; }
+    header button {
+      background: white; color: #1a73e8; border: none;
+      padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 13px;
+    }
+
+    .totaux { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .card {
+      background: white; border-radius: 8px; padding: 16px 24px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1); flex: 1; min-width: 180px;
+    }
+    .card h3 { font-size: 13px; color: #888; margin-bottom: 6px; }
+    .card p { font-size: 22px; font-weight: bold; color: #1a73e8; }
+    .card.sport p { color: #34a853; }
+    .card.reste p { color: #ea4335; }
+
+    .table-wrap { overflow-x: auto; background: white; border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead { background: #1a73e8; color: white; }
+    thead th { padding: 12px 16px; text-align: left; }
+    tbody tr:nth-child(even) { background: #f8f9fa; }
+    tbody tr:hover { background: #e8f0fe; }
+    td { padding: 10px 16px; border-bottom: 1px solid #eee; }
+    td.validated { color: #888; }
+
+    input[type="text"].edit-field {
+      width: 100%; border: 1px solid #ccc; border-radius: 4px;
+      padding: 4px 8px; font-size: 14px;
+    }
+    .check-btn {
+      background: #34a853; color: white; border: none;
+      padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 13px;
+    }
+    .check-btn:disabled { background: #aaa; cursor: not-allowed; }
+    .validated-badge {
+      background: #e6f4ea; color: #34a853;
+      padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;
+    }
+
+    .filters { margin-bottom: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .filters input, .filters select {
+      padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;
+    }
+
+    #admin-link-wrap { margin-top: 20px; text-align: right; }
+    #admin-link-wrap a { color: #888; font-size: 12px; text-decoration: none; }
+    #admin-link-wrap a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div id="login-screen">
+  <h1>🏢 CSE - Suivi des dépenses</h1>
+  <input type="text" id="input-user" placeholder="Identifiant" />
+  <input type="password" id="input-pass" placeholder="Mot de passe" />
+  <button onclick="login()">Se connecter</button>
+  <p id="login-error"></p>
+</div>
+
+<div id="app">
+  <header>
+    <h1>🏢 CSE - Suivi des dépenses</h1>
+    <div>
+      <span id="user-label"></span>
+      <button onclick="logout()">Déconnexion</button>
+    </div>
+  </header>
+
+  <div class="totaux">
+    <div class="card">
+      <h3>💼 Total Vacances prévu</h3>
+      <p id="total-vac-prevu">0 €</p>
+    </div>
+    <div class="card">
+      <h3>✅ Vacances validées</h3>
+      <p id="total-vac-valide">0 €</p>
+    </div>
+    <div class="card reste">
+      <h3>⏳ Vacances restantes</h3>
+      <p id="total-vac-reste">0 €</p>
+    </div>
+    <div class="card sport">
+      <h3>🏅 Total Sport prévu</h3>
+      <p id="total-sport-prevu">0 €</p>
+    </div>
+    <div class="card sport">
+      <h3>✅ Sport validé</h3>
+      <p id="total-sport-valide">0 €</p>
+    </div>
+    <div class="card reste">
+      <h3>⏳ Sport restant</h3>
+      <p id="total-sport-reste">0 €</p>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input type="text" id="search" placeholder="🔍 Rechercher un nom..." oninput="renderTable()" />
+    <select id="filter-cat" onchange="renderTable()">
+      <option value="">Toutes catégories</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="C">C</option>
+      <option value="D">D</option>
+      <option value="E">E</option>
+    </select>
+    <select id="filter-status" onchange="renderTable()">
+      <option value="">Tous statuts</option>
+      <option value="validated">Validés</option>
+      <option value="pending">En attente</option>
+    </select>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Cat.</th>
+          <th>Vacances (€)</th>
+          <th>Sport (€)</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <div id="admin-link-wrap">
+    <a href="admin.html" id="admin-link" style="display:none">⚙️ Journal admin</a>
+  </div>
+</div>
+
+<script>
+const USERS = {
+  "admin": { pass: "admin2024", role: "admin", nom: "Administrateur" },
+};
+
+const SALARIES = [
+  {id:1,  nom:"NGO",                prenom:"Ngoc Oanh",        cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:2,  nom:"BERTOLINO",          prenom:"Matteo",           cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:3,  nom:"COHADIER",           prenom:"Betty",            cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:4,  nom:"STEFAN",             prenom:"Alison",           cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:5,  nom:"GAUTIER",            prenom:"Roman",            cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:6,  nom:"ELENA",              prenom:"Mathias",          cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:7,  nom:"CAPPELLE",           prenom:"Marie",            cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:8,  nom:"DE MORAIS",          prenom:"Caroline",         cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:9,  nom:"GENILLON",           prenom:"Lucas",            cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:10, nom:"JANEIRO",            prenom:"Quentin",          cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:11, nom:"LECLERC",            prenom:"Victor",           cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:12, nom:"LOPES",              prenom:"Angelo",           cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:13, nom:"LUTET",              prenom:"Dimitri",          cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:14, nom:"ROBERJOT",           prenom:"Raphaël",          cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:15, nom:"SOVEAUX",            prenom:"Maxence",          cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:16, nom:"TIFOUR",             prenom:"Léa",              cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:17, nom:"DEMOTS",             prenom:"Martial",          cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:18, nom:"VALTIDA",            prenom:"Sabrina",          cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:19, nom:"CRETE",              prenom:"Pierre",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:20, nom:"LEGHBALI",           prenom:"Kassim",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:21, nom:"RICHARD",            prenom:"Julien",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:22, nom:"RIVOAL",             prenom:"Alban",            cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:23, nom:"NOYAU",              prenom:"Chloé",            cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:24, nom:"DESCHAECK",          prenom:"Maxime",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:25, nom:"DION",               prenom:"Alix",             cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:26, nom:"FLEURY",             prenom:"Valentine",        cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:27, nom:"DRAPIER",            prenom:"Aurélien",         cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:28, nom:"HIVANHOE",           prenom:"Nicolas",          cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:29, nom:"PARIENTE",           prenom:"Jean-Philippe",    cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:30, nom:"QUANTIN",            prenom:"Camille",          cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:31, nom:"DORO",               prenom:"Oriane",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:32, nom:"THOMAS",             prenom:"Raphaëlle",        cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:33, nom:"DE BARROS",          prenom:"Stéphanie",        cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:34, nom:"BOSSIERE",           prenom:"Adrien",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:35, nom:"CHERBUY",            prenom:"Valentin",         cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:36, nom:"CHIOVETTA",          prenom:"Theotime",         cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:37, nom:"DE OLIVEIRA",        prenom:"Loïc",             cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:38, nom:"MAYANA",             prenom:"Pettan",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:39, nom:"LAMBERT",            prenom:"Mickaël",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:40, nom:"VANDERSTEEN",        prenom:"Alexis",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:41, nom:"PAPON",              prenom:"Anthony",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:42, nom:"FONFREDE",           prenom:"Bruno",            cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:43, nom:"GHEMMOUR",           prenom:"Farida",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:44, nom:"MALIH",              prenom:"Jerome",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:45, nom:"REMY",               prenom:"Pascal",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:46, nom:"SAUPIN",             prenom:"Jérôme",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:47, nom:"LAIDAIN",            prenom:"Bertrand",         cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:48, nom:"ROY",                prenom:"Jules",            cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:49, nom:"VEGA",               prenom:"Carole",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:50, nom:"SOUVANT",            prenom:"Nicolas",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:51, nom:"DEMITRA",            prenom:"Jérémy",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:52, nom:"BOITELLE",           prenom:"Brice",            cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:53, nom:"BAHA",               prenom:"Fatiha",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:54, nom:"ALEXIS",             prenom:"Sylvain",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:55, nom:"COMPAIN",            prenom:"Gabriel",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:56, nom:"HACHE",              prenom:"Marjorie",         cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:57, nom:"HOLLMAN",            prenom:"Justine",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:58, nom:"DROUET",             prenom:"Jérôme",           cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:59, nom:"MORGAN",             prenom:"Laurence",         cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:60, nom:"LE NY",              prenom:"Julien",           cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:61, nom:"GONZALEZ",           prenom:"Césaréo",          cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:62, nom:"FELICIE",            prenom:"Alain",            cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:63, nom:"LANGLOIS",           prenom:"Pascal",           cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:64, nom:"FRANKS CHARPENTIER", prenom:"Christel",         cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:65, nom:"REYNAUD",            prenom:"Christian",        cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
+  {id:66, nom:"JURGENSEN",          prenom:"Tristan",          cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:67, nom:"COTOGNO",            prenom:"Michel",           cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:68, nom:"ROUAULT",            prenom:"Olivier",          cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:69, nom:"MOQADDEM",           prenom:"Mourad",           cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:70, nom:"ALLAERT",            prenom:"Christian",        cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:71, nom:"ASCHER",             prenom:"Grégory",          cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:72, nom:"PREMMEREUR",         prenom:"Pierre",           cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:73, nom:"SALMON",             prenom:"Justine",          cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:74, nom:"FITOUSSI",           prenom:"William-Benoît",   cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:75, nom:"PIAU",               prenom:"Guillaume",        cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:76, nom:"OLLIVIER",           prenom:"Kévin",            cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:77, nom:"FONTAINE",           prenom:"Yann",             cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+];
+
+let currentUser = null;
+let data = [];
+
+function loadData() {
+  const saved = localStorage.getItem("cse_data");
+  data = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(SALARIES));
+}
+function saveData() {
+  localStorage.setItem("cse_data", JSON.stringify(data));
+}
+function loadLog() {
+  const saved = localStorage.getItem("cse_log");
+  return saved ? JSON.parse(saved) : [];
+}
+function saveLog(log) {
+  localStorage.setItem("cse_log", JSON.stringify(log));
+}
+
+function login() {
+  const u = document.getElementById("input-user").value.trim();
+  const p = document.getElementById("input-pass").value.trim();
+  if (USERS[u] && USERS[u].pass === p) {
+    currentUser = { id: u, ...USERS[u] };
+    localStorage.setItem("cse_session", currentUser.role);
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("user-label").textContent = "👤 " + currentUser.nom;
+    if (currentUser.role === "admin") {
+      document.getElementById("admin-link").style.display = "inline";
+    }
+    loadData();
+    renderTable();
+    updateTotaux();
+  } else {
+    document.getElementById("login-error").textContent = "Identifiant ou mot de passe incorrect.";
+  }
+}
+
+function logout() {
+  currentUser = null;
+  localStorage.removeItem("cse_session");
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("input-user").value = "";
+  document.getElementById("input-pass").value = "";
+}
+
+function renderTable() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const cat = document.getElementById("filter-cat").value;
+  const status = document.getElementById("filter-status").value;
+
+  const filtered = data.filter(s => {
+    const matchSearch = (s.nom + " " + s.prenom).toLowerCase().includes(search);
+    const matchCat = cat ? s.cat === cat : true;
+    const matchStatus = status === "validated" ? s.valide : status === "pending" ? !s.valide : true;
+    return matchSearch && matchCat && matchStatus;
+  });
+
+  const tbody = document.getElementById("table-body");
+  tbody.innerHTML = "";
+  filtered.forEach((s, idx) => {
+    const tr = document.createElement("tr");
+    if (s.valide) {
+      tr.innerHTML = `
+        <td>${idx+1}</td>
+        <td class="validated">${s.nom}</td>
+        <td class="validated">${s.prenom}</td>
+        <td>${s.cat}</td>
+        <td class="validated">${s.vac} €</td>
+        <td class="validated">${s.sport} €</td>
+        <td><span class="validated-badge">✅ Validé</span></td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td>${idx+1}</td>
+        <td>${s.nom}</td>
+        <td>${s.prenom}</td>
+        <td>${s.cat}</td>
+        <td><input type="text" class="edit-field" value="${s.vac}" onchange="updateVal(${s.id}, 'vac', this.value)" /></td>
+        <td><input type="text" class="edit-field" value="${s.sport}" onchange="updateVal(${s.id}, 'sport', this.value)" /></td>
+        <td><button class="check-btn" onclick="valider(${s.id})">✅ Valider</button></td>
+      `;
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+function updateVal(id, field, val) {
+  const num = parseFloat(val);
+  if (!isNaN(num)) {
+    const s = data.find(x => x.id === id);
+    if (s && !s.valide) {
+      s[field] = num;
+      saveData();
+      updateTotaux();
+    }
+  }
+}
+
+function valider(id) {
+  const s = data.find(x => x.id === id);
+  if (s && !s.valide) {
+    const now = new Date().toLocaleString("fr-FR");
+    s.valide = true;
+    s.validePar = currentUser.nom;
+    s.valideDate = now;
+    saveData();
+    const log = loadLog();
+    log.push({ nom: s.nom, prenom: s.prenom, validePar: currentUser.nom, date: now });
+    saveLog(log);
+    renderTable();
+    updateTotaux();
+  }
+}
+
+function updateTotaux() {
+  const totalVacPrevu = data.reduce((a, s) => a + s.vac, 0);
+  const totalVacValide = data.filter(s => s.valide).reduce((a, s) => a + s.vac, 0);
+  const totalSportPrevu = data.reduce((a, s) => a + s.sport, 0);
+  const totalSportValide = data.filter(s => s.valide).reduce((a, s) => a + s.sport, 0);
+
+  document.getElementById("total-vac-prevu").textContent = totalVacPrevu + " €";
+  document.getElementById("total-vac-valide").textContent = totalVacValide + " €";
+  document.getElementById("total-vac-reste").textContent = (totalVacPrevu - totalVacValide) + " €";
+  document.getElementById("total-sport-prevu").textContent = totalSportPrevu + " €";
+  document.getElementById("total-sport-valide").textContent = totalSportValide + " €";
+  document.getElementById("total-sport-reste").textContent = (totalSportPrevu - totalSportValide) + " €";
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && document.getElementById("login-screen").style.display !== "none") login();
+});
+
+loadData();
+</script>
+</body>
+</html>
