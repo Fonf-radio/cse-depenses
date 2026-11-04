@@ -145,6 +145,15 @@
     }
     .btn-sport:hover { background: #15803d; }
 
+    .btn-unlock {
+      margin-left: 8px; padding: 4px 10px;
+      background: transparent; border: 1px solid #d1d5db;
+      border-radius: 6px; font-size: 11px; font-weight: 500;
+      cursor: pointer; color: #6b7280; font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-unlock:hover { background: #f5f7fa; border-color: #9ca3af; color: #374151; }
+
     .badge {
       display: inline-block; padding: 3px 10px; border-radius: 20px;
       font-size: 11px; font-weight: 500;
@@ -191,7 +200,6 @@
   </div>
 
   <div class="main">
-
     <div class="totaux">
       <div class="card">
         <div class="card-label">Vacances prévu</div>
@@ -408,6 +416,7 @@ function renderTable() {
   const search = document.getElementById("search").value.toLowerCase();
   const cat = document.getElementById("filter-cat").value;
   const status = document.getElementById("filter-status").value;
+  const isAdmin = currentUser && currentUser.role === "admin";
 
   const filtered = data.filter(s => {
     const matchSearch = (s.nom + " " + s.prenom).toLowerCase().includes(search);
@@ -423,13 +432,22 @@ function renderTable() {
   const tbody = document.getElementById("table-body");
   tbody.innerHTML = "";
   filtered.forEach((s, idx) => {
+
     const vacCell = s.valideVac
-      ? `<td class="dim">${s.vac} €</td><td><span class="badge badge-vac">Validé</span></td>`
+      ? `<td class="dim">${s.vac} €</td>
+         <td>
+           <span class="badge badge-vac">Validé</span>
+           ${isAdmin ? `<button class="btn-unlock" onclick="deverrouiller(${s.id}, 'vac')">Modifier</button>` : ""}
+         </td>`
       : `<td><input type="text" class="edit-field" value="${s.vac}" onchange="updateVal(${s.id}, 'vac', this.value)" /></td>
          <td><button class="btn-vac" onclick="valider(${s.id}, 'vac')">Valider</button></td>`;
 
     const sportCell = s.valideSport
-      ? `<td class="dim">${s.sport} €</td><td><span class="badge badge-sport">Validé</span></td>`
+      ? `<td class="dim">${s.sport} €</td>
+         <td>
+           <span class="badge badge-sport">Validé</span>
+           ${isAdmin ? `<button class="btn-unlock" onclick="deverrouiller(${s.id}, 'sport')">Modifier</button>` : ""}
+         </td>`
       : `<td><input type="text" class="edit-field" value="${s.sport}" onchange="updateVal(${s.id}, 'sport', this.value)" /></td>
          <td><button class="btn-sport" onclick="valider(${s.id}, 'sport')">Valider</button></td>`;
 
@@ -476,6 +494,25 @@ function valider(id, type) {
   saveData(); renderTable(); updateTotaux();
 }
 
+function deverrouiller(id, type) {
+  const s = data.find(x => x.id === id);
+  if (!s || currentUser.role !== "admin") return;
+  const now = new Date().toLocaleString("fr-FR");
+  if (type === "vac") {
+    s.valideVac = false; s.valideVacPar = ""; s.valideVacDate = "";
+    const log = loadLog();
+    log.push({ type: "Vacances — Déverrouillé", nom: s.nom, prenom: s.prenom, montant: s.vac, validePar: currentUser.nom, date: now });
+    saveLog(log);
+  }
+  if (type === "sport") {
+    s.valideSport = false; s.valideSportPar = ""; s.valideSportDate = "";
+    const log = loadLog();
+    log.push({ type: "Sport — Déverrouillé", nom: s.nom, prenom: s.prenom, montant: s.sport, validePar: currentUser.nom, date: now });
+    saveLog(log);
+  }
+  saveData(); renderTable(); updateTotaux();
+}
+
 function updateTotaux() {
   const total = SALARIES.length;
   const totalVacPrevu   = SALARIES.reduce((a, s) => a + MONTANTS_FIXES[s.cat].vac, 0);
@@ -491,7 +528,6 @@ function updateTotaux() {
   document.getElementById("total-sport-prevu").textContent  = totalSportPrevu + " €";
   document.getElementById("total-sport-valide").textContent = totalSportValide + " €";
   document.getElementById("total-sport-reste").textContent  = (totalSportPrevu - totalSportValide) + " €";
-
   document.getElementById("count-vac").textContent         = countVac + " / " + total + " personnes";
   document.getElementById("count-vac-reste").textContent   = (total - countVac) + " / " + total + " personnes";
   document.getElementById("count-sport").textContent       = countSport + " / " + total + " personnes";
