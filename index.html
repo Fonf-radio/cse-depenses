@@ -80,6 +80,7 @@
     .card-value { font-size: 24px; font-weight: 600; color: #1a73e8; }
     .card-value.green { color: #16a34a; }
     .card-value.red { color: #dc2626; }
+    .card-count { font-size: 12px; color: #6b7280; margin-top: 6px; }
 
     .toolbar {
       display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
@@ -190,6 +191,7 @@
   </div>
 
   <div class="main">
+
     <div class="totaux">
       <div class="card">
         <div class="card-label">Vacances prévu</div>
@@ -198,10 +200,12 @@
       <div class="card">
         <div class="card-label">Vacances validées</div>
         <div class="card-value green" id="total-vac-valide">0 €</div>
+        <div class="card-count" id="count-vac">0 / 77 personnes</div>
       </div>
       <div class="card">
         <div class="card-label">Vacances restantes</div>
         <div class="card-value red" id="total-vac-reste">0 €</div>
+        <div class="card-count" id="count-vac-reste">77 / 77 personnes</div>
       </div>
       <div class="card">
         <div class="card-label">Sport prévu</div>
@@ -210,10 +214,12 @@
       <div class="card">
         <div class="card-label">Sport validé</div>
         <div class="card-value green" id="total-sport-valide">0 €</div>
+        <div class="card-count" id="count-sport">0 / 77 personnes</div>
       </div>
       <div class="card">
         <div class="card-label">Sport restant</div>
         <div class="card-value red" id="total-sport-reste">0 €</div>
+        <div class="card-count" id="count-sport-reste">77 / 77 personnes</div>
       </div>
     </div>
 
@@ -407,9 +413,9 @@ function renderTable() {
     const matchSearch = (s.nom + " " + s.prenom).toLowerCase().includes(search);
     const matchCat = cat ? s.cat === cat : true;
     let matchStatus = true;
-    if (status === "vac_valide")   matchStatus = s.valideVac;
-    if (status === "sport_valide") matchStatus = s.valideSport;
-    if (status === "vac_pending")  matchStatus = !s.valideVac;
+    if (status === "vac_valide")    matchStatus = s.valideVac;
+    if (status === "sport_valide")  matchStatus = s.valideSport;
+    if (status === "vac_pending")   matchStatus = !s.valideVac;
     if (status === "sport_pending") matchStatus = !s.valideSport;
     return matchSearch && matchCat && matchStatus;
   });
@@ -471,17 +477,25 @@ function valider(id, type) {
 }
 
 function updateTotaux() {
+  const total = SALARIES.length;
   const totalVacPrevu   = SALARIES.reduce((a, s) => a + MONTANTS_FIXES[s.cat].vac, 0);
   const totalSportPrevu = SALARIES.reduce((a, s) => a + MONTANTS_FIXES[s.cat].sport, 0);
   const totalVacValide   = data.filter(s => s.valideVac).reduce((a, s) => a + s.vac, 0);
   const totalSportValide = data.filter(s => s.valideSport).reduce((a, s) => a + s.sport, 0);
+  const countVac   = data.filter(s => s.valideVac).length;
+  const countSport = data.filter(s => s.valideSport).length;
 
-  document.getElementById("total-vac-prevu").textContent   = totalVacPrevu + " €";
-  document.getElementById("total-vac-valide").textContent  = totalVacValide + " €";
-  document.getElementById("total-vac-reste").textContent   = (totalVacPrevu - totalVacValide) + " €";
+  document.getElementById("total-vac-prevu").textContent    = totalVacPrevu + " €";
+  document.getElementById("total-vac-valide").textContent   = totalVacValide + " €";
+  document.getElementById("total-vac-reste").textContent    = (totalVacPrevu - totalVacValide) + " €";
   document.getElementById("total-sport-prevu").textContent  = totalSportPrevu + " €";
   document.getElementById("total-sport-valide").textContent = totalSportValide + " €";
   document.getElementById("total-sport-reste").textContent  = (totalSportPrevu - totalSportValide) + " €";
+
+  document.getElementById("count-vac").textContent         = countVac + " / " + total + " personnes";
+  document.getElementById("count-vac-reste").textContent   = (total - countVac) + " / " + total + " personnes";
+  document.getElementById("count-sport").textContent       = countSport + " / " + total + " personnes";
+  document.getElementById("count-sport-reste").textContent = (total - countSport) + " / " + total + " personnes";
 }
 
 document.addEventListener("keydown", e => {
