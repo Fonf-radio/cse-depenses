@@ -60,17 +60,29 @@
     td.validated { color: #888; }
 
     input[type="text"].edit-field {
-      width: 100%; border: 1px solid #ccc; border-radius: 4px;
+      width: 80px; border: 1px solid #ccc; border-radius: 4px;
       padding: 4px 8px; font-size: 14px;
     }
-    .check-btn {
-      background: #34a853; color: white; border: none;
-      padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 13px;
+    .btn-vac {
+      background: #1a73e8; color: white; border: none;
+      padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;
+      white-space: nowrap;
     }
-    .check-btn:disabled { background: #aaa; cursor: not-allowed; }
-    .validated-badge {
+    .btn-sport {
+      background: #34a853; color: white; border: none;
+      padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;
+      white-space: nowrap;
+    }
+    .btn-vac:disabled, .btn-sport:disabled {
+      background: #aaa; cursor: not-allowed;
+    }
+    .badge-vac {
+      background: #e8f0fe; color: #1a73e8;
+      padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;
+    }
+    .badge-sport {
       background: #e6f4ea; color: #34a853;
-      padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;
+      padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;
     }
 
     .filters { margin-bottom: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -141,8 +153,10 @@
     </select>
     <select id="filter-status" onchange="renderTable()">
       <option value="">Tous statuts</option>
-      <option value="validated">Validés</option>
-      <option value="pending">En attente</option>
+      <option value="vac_valide">Vacances validées</option>
+      <option value="sport_valide">Sport validé</option>
+      <option value="vac_pending">Vacances en attente</option>
+      <option value="sport_pending">Sport en attente</option>
     </select>
   </div>
 
@@ -155,8 +169,9 @@
           <th>Prénom</th>
           <th>Cat.</th>
           <th>Vacances (€)</th>
+          <th>Statut Vacances</th>
           <th>Sport (€)</th>
-          <th>Statut</th>
+          <th>Statut Sport</th>
         </tr>
       </thead>
       <tbody id="table-body"></tbody>
@@ -174,83 +189,83 @@ const USERS = {
 };
 
 const SALARIES = [
-  {id:1,  nom:"NGO",                prenom:"Ngoc Oanh",        cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:2,  nom:"BERTOLINO",          prenom:"Matteo",           cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:3,  nom:"COHADIER",           prenom:"Betty",            cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:4,  nom:"STEFAN",             prenom:"Alison",           cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:5,  nom:"GAUTIER",            prenom:"Roman",            cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:6,  nom:"ELENA",              prenom:"Mathias",          cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:7,  nom:"CAPPELLE",           prenom:"Marie",            cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:8,  nom:"DE MORAIS",          prenom:"Caroline",         cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:9,  nom:"GENILLON",           prenom:"Lucas",            cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:10, nom:"JANEIRO",            prenom:"Quentin",          cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:11, nom:"LECLERC",            prenom:"Victor",           cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:12, nom:"LOPES",              prenom:"Angelo",           cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:13, nom:"LUTET",              prenom:"Dimitri",          cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:14, nom:"ROBERJOT",           prenom:"Raphaël",          cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:15, nom:"SOVEAUX",            prenom:"Maxence",          cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:16, nom:"TIFOUR",             prenom:"Léa",              cat:"A", vac:250, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:17, nom:"DEMOTS",             prenom:"Martial",          cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:18, nom:"VALTIDA",            prenom:"Sabrina",          cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:19, nom:"CRETE",              prenom:"Pierre",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:20, nom:"LEGHBALI",           prenom:"Kassim",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:21, nom:"RICHARD",            prenom:"Julien",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:22, nom:"RIVOAL",             prenom:"Alban",            cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:23, nom:"NOYAU",              prenom:"Chloé",            cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:24, nom:"DESCHAECK",          prenom:"Maxime",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:25, nom:"DION",               prenom:"Alix",             cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:26, nom:"FLEURY",             prenom:"Valentine",        cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:27, nom:"DRAPIER",            prenom:"Aurélien",         cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:28, nom:"HIVANHOE",           prenom:"Nicolas",          cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:29, nom:"PARIENTE",           prenom:"Jean-Philippe",    cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:30, nom:"QUANTIN",            prenom:"Camille",          cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:31, nom:"DORO",               prenom:"Oriane",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:32, nom:"THOMAS",             prenom:"Raphaëlle",        cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:33, nom:"DE BARROS",          prenom:"Stéphanie",        cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:34, nom:"BOSSIERE",           prenom:"Adrien",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:35, nom:"CHERBUY",            prenom:"Valentin",         cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:36, nom:"CHIOVETTA",          prenom:"Theotime",         cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:37, nom:"DE OLIVEIRA",        prenom:"Loïc",             cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:38, nom:"MAYANA",             prenom:"Pettan",           cat:"B", vac:200, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:39, nom:"LAMBERT",            prenom:"Mickaël",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:40, nom:"VANDERSTEEN",        prenom:"Alexis",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:41, nom:"PAPON",              prenom:"Anthony",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:42, nom:"FONFREDE",           prenom:"Bruno",            cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:43, nom:"GHEMMOUR",           prenom:"Farida",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:44, nom:"MALIH",              prenom:"Jerome",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:45, nom:"REMY",               prenom:"Pascal",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:46, nom:"SAUPIN",             prenom:"Jérôme",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:47, nom:"LAIDAIN",            prenom:"Bertrand",         cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:48, nom:"ROY",                prenom:"Jules",            cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:49, nom:"VEGA",               prenom:"Carole",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:50, nom:"SOUVANT",            prenom:"Nicolas",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:51, nom:"DEMITRA",            prenom:"Jérémy",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:52, nom:"BOITELLE",           prenom:"Brice",            cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:53, nom:"BAHA",               prenom:"Fatiha",           cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:54, nom:"ALEXIS",             prenom:"Sylvain",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:55, nom:"COMPAIN",            prenom:"Gabriel",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:56, nom:"HACHE",              prenom:"Marjorie",         cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:57, nom:"HOLLMAN",            prenom:"Justine",          cat:"C", vac:150, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:58, nom:"DROUET",             prenom:"Jérôme",           cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:59, nom:"MORGAN",             prenom:"Laurence",         cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:60, nom:"LE NY",              prenom:"Julien",           cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:61, nom:"GONZALEZ",           prenom:"Césaréo",          cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:62, nom:"FELICIE",            prenom:"Alain",            cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:63, nom:"LANGLOIS",           prenom:"Pascal",           cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:64, nom:"FRANKS CHARPENTIER", prenom:"Christel",         cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:65, nom:"REYNAUD",            prenom:"Christian",        cat:"D", vac:100, sport:150, valide:false, validePar:"", valideDate:""},
-  {id:66, nom:"JURGENSEN",          prenom:"Tristan",          cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
-  {id:67, nom:"COTOGNO",            prenom:"Michel",           cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
-  {id:68, nom:"ROUAULT",            prenom:"Olivier",          cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
-  {id:69, nom:"MOQADDEM",           prenom:"Mourad",           cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
-  {id:70, nom:"ALLAERT",            prenom:"Christian",        cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
-  {id:71, nom:"ASCHER",             prenom:"Grégory",          cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
-  {id:72, nom:"PREMMEREUR",         prenom:"Pierre",           cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
-  {id:73, nom:"SALMON",             prenom:"Justine",          cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
-  {id:74, nom:"FITOUSSI",           prenom:"William-Benoît",   cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
-  {id:75, nom:"PIAU",               prenom:"Guillaume",        cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
-  {id:76, nom:"OLLIVIER",           prenom:"Kévin",            cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
-  {id:77, nom:"FONTAINE",           prenom:"Yann",             cat:"E", vac:50,  sport:150, valide:false, validePar:"", valideDate:""},
+  {id:1,  nom:"NGO",                prenom:"Ngoc Oanh",        cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:2,  nom:"BERTOLINO",          prenom:"Matteo",           cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:3,  nom:"COHADIER",           prenom:"Betty",            cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:4,  nom:"STEFAN",             prenom:"Alison",           cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:5,  nom:"GAUTIER",            prenom:"Roman",            cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:6,  nom:"ELENA",              prenom:"Mathias",          cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:7,  nom:"CAPPELLE",           prenom:"Marie",            cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:8,  nom:"DE MORAIS",          prenom:"Caroline",         cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:9,  nom:"GENILLON",           prenom:"Lucas",            cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:10, nom:"JANEIRO",            prenom:"Quentin",          cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:11, nom:"LECLERC",            prenom:"Victor",           cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:12, nom:"LOPES",              prenom:"Angelo",           cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:13, nom:"LUTET",              prenom:"Dimitri",          cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:14, nom:"ROBERJOT",           prenom:"Raphaël",          cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:15, nom:"SOVEAUX",            prenom:"Maxence",          cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:16, nom:"TIFOUR",             prenom:"Léa",              cat:"A", vac:250, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:17, nom:"DEMOTS",             prenom:"Martial",          cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:18, nom:"VALTIDA",            prenom:"Sabrina",          cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:19, nom:"CRETE",              prenom:"Pierre",           cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:20, nom:"LEGHBALI",           prenom:"Kassim",           cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:21, nom:"RICHARD",            prenom:"Julien",           cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:22, nom:"RIVOAL",             prenom:"Alban",            cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:23, nom:"NOYAU",              prenom:"Chloé",            cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:24, nom:"DESCHAECK",          prenom:"Maxime",           cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:25, nom:"DION",               prenom:"Alix",             cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:26, nom:"FLEURY",             prenom:"Valentine",        cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:27, nom:"DRAPIER",            prenom:"Aurélien",         cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:28, nom:"HIVANHOE",           prenom:"Nicolas",          cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:29, nom:"PARIENTE",           prenom:"Jean-Philippe",    cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:30, nom:"QUANTIN",            prenom:"Camille",          cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:31, nom:"DORO",               prenom:"Oriane",           cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:32, nom:"THOMAS",             prenom:"Raphaëlle",        cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:33, nom:"DE BARROS",          prenom:"Stéphanie",        cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:34, nom:"BOSSIERE",           prenom:"Adrien",           cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:35, nom:"CHERBUY",            prenom:"Valentin",         cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:36, nom:"CHIOVETTA",          prenom:"Theotime",         cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:37, nom:"DE OLIVEIRA",        prenom:"Loïc",             cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:38, nom:"MAYANA",             prenom:"Pettan",           cat:"B", vac:200, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:39, nom:"LAMBERT",            prenom:"Mickaël",          cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:40, nom:"VANDERSTEEN",        prenom:"Alexis",           cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:41, nom:"PAPON",              prenom:"Anthony",          cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:42, nom:"FONFREDE",           prenom:"Bruno",            cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:43, nom:"GHEMMOUR",           prenom:"Farida",           cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:44, nom:"MALIH",              prenom:"Jerome",           cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:45, nom:"REMY",               prenom:"Pascal",           cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:46, nom:"SAUPIN",             prenom:"Jérôme",           cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:47, nom:"LAIDAIN",            prenom:"Bertrand",         cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:48, nom:"ROY",                prenom:"Jules",            cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:49, nom:"VEGA",               prenom:"Carole",           cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:50, nom:"SOUVANT",            prenom:"Nicolas",          cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:51, nom:"DEMITRA",            prenom:"Jérémy",           cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:52, nom:"BOITELLE",           prenom:"Brice",            cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:53, nom:"BAHA",               prenom:"Fatiha",           cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:54, nom:"ALEXIS",             prenom:"Sylvain",          cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:55, nom:"COMPAIN",            prenom:"Gabriel",          cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:56, nom:"HACHE",              prenom:"Marjorie",         cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:57, nom:"HOLLMAN",            prenom:"Justine",          cat:"C", vac:150, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:58, nom:"DROUET",             prenom:"Jérôme",           cat:"D", vac:100, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:59, nom:"MORGAN",             prenom:"Laurence",         cat:"D", vac:100, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:60, nom:"LE NY",              prenom:"Julien",           cat:"D", vac:100, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:61, nom:"GONZALEZ",           prenom:"Césaréo",          cat:"D", vac:100, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:62, nom:"FELICIE",            prenom:"Alain",            cat:"D", vac:100, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:63, nom:"LANGLOIS",           prenom:"Pascal",           cat:"D", vac:100, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:64, nom:"FRANKS CHARPENTIER", prenom:"Christel",         cat:"D", vac:100, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:65, nom:"REYNAUD",            prenom:"Christian",        cat:"D", vac:100, sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:66, nom:"JURGENSEN",          prenom:"Tristan",          cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:67, nom:"COTOGNO",            prenom:"Michel",           cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:68, nom:"ROUAULT",            prenom:"Olivier",          cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:69, nom:"MOQADDEM",           prenom:"Mourad",           cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:70, nom:"ALLAERT",            prenom:"Christian",        cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:71, nom:"ASCHER",             prenom:"Grégory",          cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:72, nom:"PREMMEREUR",         prenom:"Pierre",           cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:73, nom:"SALMON",             prenom:"Justine",          cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:74, nom:"FITOUSSI",           prenom:"William-Benoît",   cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:75, nom:"PIAU",               prenom:"Guillaume",        cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:76, nom:"OLLIVIER",           prenom:"Kévin",            cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
+  {id:77, nom:"FONTAINE",           prenom:"Yann",             cat:"E", vac:50,  sport:150, valideVac:false, valideSport:false, valideVacPar:"", valideSportPar:"", valideVacDate:"", valideSportDate:""},
 ];
 
 let currentUser = null;
@@ -264,8 +279,7 @@ function saveData() {
   localStorage.setItem("cse_data", JSON.stringify(data));
 }
 function loadLog() {
-  const saved = localStorage.getItem("cse_log");
-  return saved ? JSON.parse(saved) : [];
+  return JSON.parse(localStorage.getItem("cse_log") || "[]");
 }
 function saveLog(log) {
   localStorage.setItem("cse_log", JSON.stringify(log));
@@ -308,7 +322,11 @@ function renderTable() {
   const filtered = data.filter(s => {
     const matchSearch = (s.nom + " " + s.prenom).toLowerCase().includes(search);
     const matchCat = cat ? s.cat === cat : true;
-    const matchStatus = status === "validated" ? s.valide : status === "pending" ? !s.valide : true;
+    let matchStatus = true;
+    if (status === "vac_valide") matchStatus = s.valideVac;
+    if (status === "sport_valide") matchStatus = s.valideSport;
+    if (status === "vac_pending") matchStatus = !s.valideVac;
+    if (status === "sport_pending") matchStatus = !s.valideSport;
     return matchSearch && matchCat && matchStatus;
   });
 
@@ -316,27 +334,25 @@ function renderTable() {
   tbody.innerHTML = "";
   filtered.forEach((s, idx) => {
     const tr = document.createElement("tr");
-    if (s.valide) {
-      tr.innerHTML = `
-        <td>${idx+1}</td>
-        <td class="validated">${s.nom}</td>
-        <td class="validated">${s.prenom}</td>
-        <td>${s.cat}</td>
-        <td class="validated">${s.vac} €</td>
-        <td class="validated">${s.sport} €</td>
-        <td><span class="validated-badge">✅ Validé</span></td>
-      `;
-    } else {
-      tr.innerHTML = `
-        <td>${idx+1}</td>
-        <td>${s.nom}</td>
-        <td>${s.prenom}</td>
-        <td>${s.cat}</td>
-        <td><input type="text" class="edit-field" value="${s.vac}" onchange="updateVal(${s.id}, 'vac', this.value)" /></td>
-        <td><input type="text" class="edit-field" value="${s.sport}" onchange="updateVal(${s.id}, 'sport', this.value)" /></td>
-        <td><button class="check-btn" onclick="valider(${s.id})">✅ Valider</button></td>
-      `;
-    }
+
+    const vacCell = s.valideVac
+      ? `<td class="validated">${s.vac} €</td><td><span class="badge-vac">✅ Validé</span></td>`
+      : `<td><input type="text" class="edit-field" value="${s.vac}" onchange="updateVal(${s.id}, 'vac', this.value)" /></td>
+         <td><button class="btn-vac" onclick="valider(${s.id}, 'vac')">✅ Valider Vacances</button></td>`;
+
+    const sportCell = s.valideSport
+      ? `<td class="validated">${s.sport} €</td><td><span class="badge-sport">✅ Validé</span></td>`
+      : `<td><input type="text" class="edit-field" value="${s.sport}" onchange="updateVal(${s.id}, 'sport', this.value)" /></td>
+         <td><button class="btn-sport" onclick="valider(${s.id}, 'sport')">✅ Valider Sport</button></td>`;
+
+    tr.innerHTML = `
+      <td>${idx+1}</td>
+      <td>${s.nom}</td>
+      <td>${s.prenom}</td>
+      <td>${s.cat}</td>
+      ${vacCell}
+      ${sportCell}
+    `;
     tbody.appendChild(tr);
   });
 }
@@ -345,35 +361,46 @@ function updateVal(id, field, val) {
   const num = parseFloat(val);
   if (!isNaN(num)) {
     const s = data.find(x => x.id === id);
-    if (s && !s.valide) {
-      s[field] = num;
-      saveData();
-      updateTotaux();
+    if (s) {
+      if (field === "vac" && !s.valideVac) { s.vac = num; saveData(); updateTotaux(); }
+      if (field === "sport" && !s.valideSport) { s.sport = num; saveData(); updateTotaux(); }
     }
   }
 }
 
-function valider(id) {
+function valider(id, type) {
   const s = data.find(x => x.id === id);
-  if (s && !s.valide) {
-    const now = new Date().toLocaleString("fr-FR");
-    s.valide = true;
-    s.validePar = currentUser.nom;
-    s.valideDate = now;
-    saveData();
+  if (!s) return;
+  const now = new Date().toLocaleString("fr-FR");
+
+  if (type === "vac" && !s.valideVac) {
+    s.valideVac = true;
+    s.valideVacPar = currentUser.nom;
+    s.valideVacDate = now;
     const log = loadLog();
-    log.push({ nom: s.nom, prenom: s.prenom, validePar: currentUser.nom, date: now });
+    log.push({ type: "Vacances", nom: s.nom, prenom: s.prenom, montant: s.vac, validePar: currentUser.nom, date: now });
     saveLog(log);
-    renderTable();
-    updateTotaux();
   }
+
+  if (type === "sport" && !s.valideSport) {
+    s.valideSport = true;
+    s.valideSportPar = currentUser.nom;
+    s.valideSportDate = now;
+    const log = loadLog();
+    log.push({ type: "Sport", nom: s.nom, prenom: s.prenom, montant: s.sport, validePar: currentUser.nom, date: now });
+    saveLog(log);
+  }
+
+  saveData();
+  renderTable();
+  updateTotaux();
 }
 
 function updateTotaux() {
   const totalVacPrevu = data.reduce((a, s) => a + s.vac, 0);
-  const totalVacValide = data.filter(s => s.valide).reduce((a, s) => a + s.vac, 0);
+  const totalVacValide = data.filter(s => s.valideVac).reduce((a, s) => a + s.vac, 0);
   const totalSportPrevu = data.reduce((a, s) => a + s.sport, 0);
-  const totalSportValide = data.filter(s => s.valide).reduce((a, s) => a + s.sport, 0);
+  const totalSportValide = data.filter(s => s.valideSport).reduce((a, s) => a + s.sport, 0);
 
   document.getElementById("total-vac-prevu").textContent = totalVacPrevu + " €";
   document.getElementById("total-vac-valide").textContent = totalVacValide + " €";
