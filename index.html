@@ -3,436 +3,256 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CSE — Suivi des dépenses</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>CSE - Suivi des dépenses</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f5f5f7;
-      color: #1d1d1f;
-      font-size: 14px;
-    }
+    body { font-family: 'Inter', sans-serif; background: #f5f7fa; color: #1a1a2e; font-size: 14px; }
 
     /* LOGIN */
     #login-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: #f5f5f7;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; height: 100vh; background: #f5f7fa;
     }
-    .login-box {
-      background: white;
-      padding: 48px 40px;
-      border-radius: 18px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      width: 360px;
+    .login-card {
+      background: white; border-radius: 12px; padding: 48px 40px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08); width: 360px;
     }
-    .login-box h1 {
-      font-size: 22px;
-      font-weight: 600;
-      color: #1d1d1f;
-      margin-bottom: 6px;
+    .login-card h1 {
+      font-size: 22px; font-weight: 600; color: #1a1a2e;
+      margin-bottom: 6px; text-align: center;
     }
-    .login-box p {
-      font-size: 13px;
-      color: #6e6e73;
-      margin-bottom: 32px;
+    .login-card p {
+      font-size: 13px; color: #6b7280; text-align: center; margin-bottom: 32px;
     }
-    .login-box label {
-      display: block;
-      font-size: 12px;
-      font-weight: 500;
-      color: #6e6e73;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: 12px; font-weight: 500;
+      color: #374151; margin-bottom: 6px; letter-spacing: 0.3px;
     }
-    .login-box input {
-      display: block;
-      width: 100%;
-      padding: 11px 14px;
-      margin-bottom: 16px;
-      border: 1px solid #d2d2d7;
-      border-radius: 10px;
-      font-size: 14px;
-      font-family: 'Inter', sans-serif;
-      color: #1d1d1f;
-      background: #fafafa;
-      transition: border 0.2s;
-      outline: none;
+    .form-group input {
+      width: 100%; padding: 10px 14px; border: 1px solid #e5e7eb;
+      border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif;
+      transition: border 0.2s; outline: none; color: #1a1a2e;
     }
-    .login-box input:focus {
-      border-color: #0071e3;
-      background: white;
-    }
-    .login-box button {
-      width: 100%;
-      padding: 12px;
-      background: #0071e3;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
+    .form-group input:focus { border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+    .btn-primary {
+      width: 100%; padding: 11px; background: #1a73e8;
+      color: white; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      font-family: 'Inter', sans-serif; margin-top: 8px;
       transition: background 0.2s;
-      margin-top: 4px;
     }
-    .login-box button:hover { background: #0077ed; }
-    .login-box button:active { background: #005bbf; }
-    #login-error {
-      color: #ff3b30;
-      font-size: 12px;
-      margin-top: 10px;
-      text-align: center;
-    }
+    .btn-primary:hover { background: #1557b0; }
+    #login-error { color: #dc2626; font-size: 12px; margin-top: 12px; text-align: center; }
 
-    /* APP */
-    #app { display: none; }
-
+    /* LAYOUT */
+    #app { display: none; min-height: 100vh; }
+    
     /* HEADER */
-    .topbar {
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid #e5e5ea;
-      padding: 0 32px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+    .header {
+      background: white; border-bottom: 1px solid #e5e7eb;
+      padding: 0 32px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
     }
-    .topbar-left h1 {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1d1d1f;
-      letter-spacing: -0.2px;
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-logo {
+      width: 32px; height: 32px; background: #1a73e8;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
     }
-    .topbar-left span {
-      font-size: 12px;
-      color: #6e6e73;
-      margin-left: 10px;
-    }
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .user-pill {
-      background: #f5f5f7;
-      border: 1px solid #e5e5ea;
-      border-radius: 20px;
-      padding: 5px 14px;
-      font-size: 13px;
-      color: #1d1d1f;
-      font-weight: 500;
-    }
+    .header-logo span { color: white; font-weight: 700; font-size: 14px; }
+    .header-title { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .header-user { font-size: 13px; color: #6b7280; }
     .btn-logout {
-      background: none;
-      border: 1px solid #d2d2d7;
-      border-radius: 8px;
-      padding: 6px 14px;
-      font-size: 13px;
-      color: #6e6e73;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
+      padding: 7px 16px; background: transparent; border: 1px solid #e5e7eb;
+      border-radius: 7px; font-size: 13px; cursor: pointer; color: #374151;
+      font-family: 'Inter', sans-serif; transition: all 0.2s;
+    }
+    .btn-logout:hover { background: #f5f7fa; border-color: #d1d5db; }
+
+    /* MAIN */
+    .main { padding: 32px; max-width: 1400px; margin: 0 auto; }
+
+    /* CARDS TOTAUX */
+    .totaux { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 28px; }
+    .card {
+      background: white; border-radius: 10px; padding: 20px;
+      border: 1px solid #e5e7eb;
+    }
+    .card-label { font-size: 11px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .card-value { font-size: 24px; font-weight: 600; color: #1a73e8; }
+    .card-value.green { color: #16a34a; }
+    .card-value.red { color: #dc2626; }
+
+    /* TOOLBAR */
+    .toolbar {
+      display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+      align-items: center; justify-content: space-between;
+    }
+    .toolbar-left { display: flex; gap: 12px; flex-wrap: wrap; }
+    .search-input {
+      padding: 9px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
+      font-size: 13px; font-family: 'Inter', sans-serif; width: 240px;
+      outline: none; transition: border 0.2s; color: #1a1a2e;
+    }
+    .search-input:focus { border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+    .select-filter {
+      padding: 9px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
+      font-size: 13px; font-family: 'Inter', sans-serif;
+      outline: none; background: white; color: #374151; cursor: pointer;
+    }
+    .admin-link {
+      font-size: 12px; color: #6b7280; text-decoration: none;
+      padding: 7px 14px; border: 1px solid #e5e7eb; border-radius: 7px;
       transition: all 0.2s;
     }
-    .btn-logout:hover {
-      background: #f5f5f7;
-      color: #1d1d1f;
-    }
+    .admin-link:hover { background: #f5f7fa; color: #374151; }
 
-    /* CONTENU */
-    .content { padding: 32px; max-width: 1400px; margin: 0 auto; }
-
-    /* CARTES TOTAUX */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 14px;
-      margin-bottom: 28px;
-    }
-    .stat-card {
-      background: white;
-      border-radius: 14px;
-      padding: 20px;
-      border: 1px solid #e5e5ea;
-    }
-    .stat-card .label {
-      font-size: 11px;
-      font-weight: 500;
-      color: #6e6e73;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-    .stat-card .value {
-      font-size: 24px;
-      font-weight: 600;
-      color: #1d1d1f;
-      letter-spacing: -0.5px;
-    }
-    .stat-card.blue .value { color: #0071e3; }
-    .stat-card.green .value { color: #34c759; }
-    .stat-card.red .value { color: #ff3b30; }
-    .stat-divider {
-      grid-column: span 6;
-      height: 1px;
-      background: #e5e5ea;
-      margin: 2px 0;
-      display: none;
-    }
-
-    /* FILTRES */
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-      align-items: center;
-    }
-    .search-wrap {
-      position: relative;
-      flex: 1;
-      max-width: 280px;
-    }
-    .search-wrap input {
-      width: 100%;
-      padding: 9px 14px 9px 36px;
-      border: 1px solid #d2d2d7;
-      border-radius: 10px;
-      font-size: 13px;
-      font-family: 'Inter', sans-serif;
-      background: white;
-      color: #1d1d1f;
-      outline: none;
-      transition: border 0.2s;
-    }
-    .search-wrap input:focus { border-color: #0071e3; }
-    .search-icon {
-      position: absolute;
-      left: 11px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #aaa;
-      font-size: 14px;
-    }
-    .toolbar select {
-      padding: 9px 14px;
-      border: 1px solid #d2d2d7;
-      border-radius: 10px;
-      font-size: 13px;
-      font-family: 'Inter', sans-serif;
-      background: white;
-      color: #1d1d1f;
-      outline: none;
-      cursor: pointer;
-    }
-    .toolbar select:focus { border-color: #0071e3; }
-
-    /* TABLEAU */
-    .table-container {
-      background: white;
-      border-radius: 14px;
-      border: 1px solid #e5e5ea;
+    /* TABLE */
+    .table-wrap {
+      background: white; border-radius: 10px; border: 1px solid #e5e7eb;
       overflow: hidden;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    thead tr {
-      border-bottom: 1px solid #e5e5ea;
-    }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
     thead th {
-      padding: 12px 16px;
-      text-align: left;
-      font-size: 11px;
-      font-weight: 600;
-      color: #6e6e73;
-      text-transform: uppercase;
+      padding: 12px 16px; text-align: left; font-size: 11px;
+      font-weight: 600; color: #6b7280; text-transform: uppercase;
       letter-spacing: 0.5px;
-      background: #fafafa;
     }
-    tbody tr {
-      border-bottom: 1px solid #f2f2f7;
-      transition: background 0.15s;
-    }
+    tbody tr { border-bottom: 1px solid #f3f4f6; transition: background 0.15s; }
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: #f5f5f7; }
-    td {
-      padding: 12px 16px;
-      color: #1d1d1f;
-      font-size: 13px;
-    }
-    td.muted { color: #6e6e73; }
-    td.num { font-variant-numeric: tabular-nums; }
+    tbody tr:hover { background: #f9fafb; }
+    td { padding: 12px 16px; color: #374151; }
+    td.dim { color: #9ca3af; }
 
-    .input-amount {
-      width: 80px;
-      padding: 6px 10px;
-      border: 1px solid #d2d2d7;
-      border-radius: 8px;
-      font-size: 13px;
-      font-family: 'Inter', sans-serif;
-      color: #1d1d1f;
-      background: #fafafa;
-      outline: none;
-      transition: border 0.2s;
+    .edit-field {
+      width: 90px; padding: 6px 10px; border: 1px solid #e5e7eb;
+      border-radius: 6px; font-size: 13px; font-family: 'Inter', sans-serif;
+      outline: none; transition: border 0.2s; color: #1a1a2e;
     }
-    .input-amount:focus {
-      border-color: #0071e3;
-      background: white;
-    }
+    .edit-field:focus { border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
 
-    .btn-validate {
-      padding: 6px 14px;
-      border: none;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 500;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
     .btn-vac {
-      background: #e8f0fe;
-      color: #0071e3;
+      padding: 6px 12px; background: #1a73e8; color: white;
+      border: none; border-radius: 6px; font-size: 12px; font-weight: 500;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: background 0.2s; white-space: nowrap;
     }
-    .btn-vac:hover { background: #0071e3; color: white; }
+    .btn-vac:hover { background: #1557b0; }
+
     .btn-sport {
-      background: #e9f9ee;
-      color: #34c759;
+      padding: 6px 12px; background: #16a34a; color: white;
+      border: none; border-radius: 6px; font-size: 12px; font-weight: 500;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: background 0.2s; white-space: nowrap;
     }
-    .btn-sport:hover { background: #34c759; color: white; }
+    .btn-sport:hover { background: #15803d; }
 
     .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 500;
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 500;
     }
-    .badge-vac { background: #e8f0fe; color: #0071e3; }
-    .badge-sport { background: #e9f9ee; color: #34c759; }
+    .badge-vac { background: #eff6ff; color: #1a73e8; }
+    .badge-sport { background: #f0fdf4; color: #16a34a; }
 
-    /* CAT BADGE */
     .cat-badge {
-      display: inline-block;
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
-      background: #f5f5f7;
-      color: #6e6e73;
-      font-size: 11px;
-      font-weight: 600;
-      text-align: center;
-      line-height: 22px;
+      display: inline-block; width: 24px; height: 24px; border-radius: 6px;
+      background: #f3f4f6; color: #374151; font-size: 12px; font-weight: 600;
+      text-align: center; line-height: 24px;
     }
-
-    /* ADMIN LINK */
-    .admin-link {
-      display: none;
-      margin-top: 20px;
-      text-align: right;
-      font-size: 12px;
-      color: #6e6e73;
-      text-decoration: none;
-    }
-    .admin-link:hover { color: #0071e3; }
   </style>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-box">
+  <div class="login-card">
     <h1>CSE</h1>
-    <p>Suivi des dépenses — Connectez-vous pour continuer</p>
-    <label>Identifiant</label>
-    <input type="text" id="input-user" placeholder="Votre identifiant" autocomplete="username" />
-    <label>Mot de passe</label>
-    <input type="password" id="input-pass" placeholder="••••••••" autocomplete="current-password" />
-    <button onclick="login()">Se connecter</button>
+    <p>Suivi des dépenses</p>
+    <div class="form-group">
+      <label>Identifiant</label>
+      <input type="text" id="input-user" placeholder="Votre identifiant" />
+    </div>
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input type="password" id="input-pass" placeholder="Votre mot de passe" />
+    </div>
+    <button class="btn-primary" onclick="login()">Se connecter</button>
     <p id="login-error"></p>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
-  <div class="topbar">
-    <div class="topbar-left">
-      <h1>CSE — Suivi des dépenses <span id="user-label"></span></h1>
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo"><span>C</span></div>
+      <span class="header-title">CSE — Suivi des dépenses</span>
     </div>
-    <div class="topbar-right">
+    <div class="header-right">
+      <span class="header-user" id="user-label"></span>
       <button class="btn-logout" onclick="logout()">Déconnexion</button>
     </div>
   </div>
 
-  <div class="content">
+  <div class="main">
 
-    <!-- STATS -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="label">Vacances — Prévu</div>
-        <div class="value blue" id="total-vac-prevu">0 €</div>
+    <!-- TOTAUX -->
+    <div class="totaux">
+      <div class="card">
+        <div class="card-label">Vacances prévu</div>
+        <div class="card-value" id="total-vac-prevu">0 €</div>
       </div>
-      <div class="stat-card">
-        <div class="label">Vacances — Validé</div>
-        <div class="value green" id="total-vac-valide">0 €</div>
+      <div class="card">
+        <div class="card-label">Vacances validées</div>
+        <div class="card-value green" id="total-vac-valide">0 €</div>
       </div>
-      <div class="stat-card">
-        <div class="label">Vacances — Restant</div>
-        <div class="value red" id="total-vac-reste">0 €</div>
+      <div class="card">
+        <div class="card-label">Vacances restantes</div>
+        <div class="card-value red" id="total-vac-reste">0 €</div>
       </div>
-      <div class="stat-card">
-        <div class="label">Sport — Prévu</div>
-        <div class="value blue" id="total-sport-prevu">0 €</div>
+      <div class="card">
+        <div class="card-label">Sport prévu</div>
+        <div class="card-value" id="total-sport-prevu">0 €</div>
       </div>
-      <div class="stat-card">
-        <div class="label">Sport — Validé</div>
-        <div class="value green" id="total-sport-valide">0 €</div>
+      <div class="card">
+        <div class="card-label">Sport validé</div>
+        <div class="card-value green" id="total-sport-valide">0 €</div>
       </div>
-      <div class="stat-card">
-        <div class="label">Sport — Restant</div>
-        <div class="value red" id="total-sport-reste">0 €</div>
+      <div class="card">
+        <div class="card-label">Sport restant</div>
+        <div class="card-value red" id="total-sport-reste">0 €</div>
       </div>
     </div>
 
     <!-- TOOLBAR -->
     <div class="toolbar">
-      <div class="search-wrap">
-        <span class="search-icon">&#9906;</span>
-        <input type="text" id="search" placeholder="Rechercher un nom..." oninput="renderTable()" />
+      <div class="toolbar-left">
+        <input type="text" class="search-input" id="search" placeholder="Rechercher un nom..." oninput="renderTable()" />
+        <select class="select-filter" id="filter-cat" onchange="renderTable()">
+          <option value="">Toutes catégories</option>
+          <option value="A">Catégorie A</option>
+          <option value="B">Catégorie B</option>
+          <option value="C">Catégorie C</option>
+          <option value="D">Catégorie D</option>
+          <option value="E">Catégorie E</option>
+        </select>
+        <select class="select-filter" id="filter-status" onchange="renderTable()">
+          <option value="">Tous statuts</option>
+          <option value="vac_valide">Vacances validées</option>
+          <option value="sport_valide">Sport validé</option>
+          <option value="vac_pending">Vacances en attente</option>
+          <option value="sport_pending">Sport en attente</option>
+        </select>
       </div>
-      <select id="filter-cat" onchange="renderTable()">
-        <option value="">Toutes catégories</option>
-        <option value="A">Catégorie A</option>
-        <option value="B">Catégorie B</option>
-        <option value="C">Catégorie C</option>
-        <option value="D">Catégorie D</option>
-        <option value="E">Catégorie E</option>
-      </select>
-      <select id="filter-status" onchange="renderTable()">
-        <option value="">Tous les statuts</option>
-        <option value="vac_valide">Vacances validées</option>
-        <option value="sport_valide">Sport validé</option>
-        <option value="vac_pending">Vacances en attente</option>
-        <option value="sport_pending">Sport en attente</option>
-      </select>
+      <a href="admin.html" id="admin-link" class="admin-link" style="display:none">Journal des validations</a>
     </div>
 
-    <!-- TABLEAU -->
-    <div class="table-container">
+    <!-- TABLE -->
+    <div class="table-wrap">
       <table>
         <thead>
           <tr>
@@ -449,8 +269,6 @@
         <tbody id="table-body"></tbody>
       </table>
     </div>
-
-    <a href="admin.html" id="admin-link" class="admin-link">Journal des validations</a>
 
   </div>
 </div>
@@ -565,3 +383,117 @@ function login() {
     localStorage.setItem("cse_session", currentUser.role);
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("app").style.display = "block";
+    document.getElementById("user-label").textContent = currentUser.nom;
+    if (currentUser.role === "admin") {
+      document.getElementById("admin-link").style.display = "inline";
+    }
+    loadData();
+    renderTable();
+    updateTotaux();
+  } else {
+    document.getElementById("login-error").textContent = "Identifiant ou mot de passe incorrect.";
+  }
+}
+
+function logout() {
+  currentUser = null;
+  localStorage.removeItem("cse_session");
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("input-user").value = "";
+  document.getElementById("input-pass").value = "";
+}
+
+function renderTable() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const cat = document.getElementById("filter-cat").value;
+  const status = document.getElementById("filter-status").value;
+
+  const filtered = data.filter(s => {
+    const matchSearch = (s.nom + " " + s.prenom).toLowerCase().includes(search);
+    const matchCat = cat ? s.cat === cat : true;
+    let matchStatus = true;
+    if (status === "vac_valide") matchStatus = s.valideVac;
+    if (status === "sport_valide") matchStatus = s.valideSport;
+    if (status === "vac_pending") matchStatus = !s.valideVac;
+    if (status === "sport_pending") matchStatus = !s.valideSport;
+    return matchSearch && matchCat && matchStatus;
+  });
+
+  const tbody = document.getElementById("table-body");
+  tbody.innerHTML = "";
+  filtered.forEach((s, idx) => {
+    const vacCell = s.valideVac
+      ? `<td class="dim">${s.vac} €</td><td><span class="badge badge-vac">Validé</span></td>`
+      : `<td><input type="text" class="edit-field" value="${s.vac}" onchange="updateVal(${s.id}, 'vac', this.value)" /></td>
+         <td><button class="btn-vac" onclick="valider(${s.id}, 'vac')">Valider</button></td>`;
+
+    const sportCell = s.valideSport
+      ? `<td class="dim">${s.sport} €</td><td><span class="badge badge-sport">Validé</span></td>`
+      : `<td><input type="text" class="edit-field" value="${s.sport}" onchange="updateVal(${s.id}, 'sport', this.value)" /></td>
+         <td><button class="btn-sport" onclick="valider(${s.id}, 'sport')">Valider</button></td>`;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="color:#9ca3af">${idx+1}</td>
+      <td style="font-weight:500">${s.nom}</td>
+      <td>${s.prenom}</td>
+      <td><span class="cat-badge">${s.cat}</span></td>
+      ${vacCell}
+      ${sportCell}
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function updateVal(id, field, val) {
+  const num = parseFloat(val);
+  if (!isNaN(num)) {
+    const s = data.find(x => x.id === id);
+    if (s) {
+      if (field === "vac" && !s.valideVac) { s.vac = num; saveData(); updateTotaux(); }
+      if (field === "sport" && !s.valideSport) { s.sport = num; saveData(); updateTotaux(); }
+    }
+  }
+}
+
+function valider(id, type) {
+  const s = data.find(x => x.id === id);
+  if (!s) return;
+  const now = new Date().toLocaleString("fr-FR");
+  if (type === "vac" && !s.valideVac) {
+    s.valideVac = true; s.valideVacPar = currentUser.nom; s.valideVacDate = now;
+    const log = loadLog();
+    log.push({ type: "Vacances", nom: s.nom, prenom: s.prenom, montant: s.vac, validePar: currentUser.nom, date: now });
+    saveLog(log);
+  }
+  if (type === "sport" && !s.valideSport) {
+    s.valideSport = true; s.valideSportPar = currentUser.nom; s.valideSportDate = now;
+    const log = loadLog();
+    log.push({ type: "Sport", nom: s.nom, prenom: s.prenom, montant: s.sport, validePar: currentUser.nom, date: now });
+    saveLog(log);
+  }
+  saveData(); renderTable(); updateTotaux();
+}
+
+function updateTotaux() {
+  const totalVacPrevu   = data.reduce((a, s) => a + s.vac, 0);
+  const totalVacValide  = data.filter(s => s.valideVac).reduce((a, s) => a + s.vac, 0);
+  const totalSportPrevu  = data.reduce((a, s) => a + s.sport, 0);
+  const totalSportValide = data.filter(s => s.valideSport).reduce((a, s) => a + s.sport, 0);
+  document.getElementById("total-vac-prevu").textContent   = totalVacPrevu + " €";
+  document.getElementById("total-vac-valide").textContent  = totalVacValide + " €";
+  document.getElementById("total-vac-reste").textContent   = (totalVacPrevu - totalVacValide) + " €";
+  document.getElementById("total-sport-prevu").textContent  = totalSportPrevu + " €";
+  document.getElementById("total-sport-valide").textContent = totalSportValide + " €";
+  document.getElementById("total-sport-reste").textContent  = (totalSportPrevu - totalSportValide) + " €";
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && document.getElementById("login-screen").style.display !== "none") login();
+});
+
+loadData();
+</script>
+</body>
+</html>
